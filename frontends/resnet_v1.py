@@ -1,5 +1,5 @@
 import tensorflow as tf
-from tensorflow.contrib import slim
+import tf_slim as slim
 from frontends import resnet_utils
 
 resnet_arg_scope = resnet_utils.resnet_arg_scope

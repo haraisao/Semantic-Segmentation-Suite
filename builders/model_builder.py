@@ -1,5 +1,5 @@
 import sys, os
-import tensorflow as tf
+import tf_slim as slim
 import subprocess
 
 sys.path.append("models")

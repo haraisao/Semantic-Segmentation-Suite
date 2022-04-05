@@ -1,6 +1,6 @@
 import os,time,cv2
 import tensorflow as tf
-import tensorflow.contrib.slim as slim
+import tf_slim as slim
 import numpy as np
 
 def ConvBlock(inputs, n_filters, kernel_size=[3, 3]):

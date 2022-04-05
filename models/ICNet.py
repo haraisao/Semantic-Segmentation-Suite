@@ -1,5 +1,5 @@
 import tensorflow as tf
-from tensorflow.contrib import slim
+import tf_slim as slim
 import numpy as np
 from frontends import frontend_builder
 import os, sys

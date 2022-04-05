@@ -1,7 +1,7 @@
 # coding=utf-8
 
 import tensorflow as tf
-from tensorflow.contrib import slim
+import tf_slim as slim
 import numpy as np
 from frontends import resnet_v2
 import os, sys
