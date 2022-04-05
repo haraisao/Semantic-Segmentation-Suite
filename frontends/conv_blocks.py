@@ -20,6 +20,8 @@ import tensorflow as tf
 
 import tf_slim as slim
 
+tf_v1=tf.compat.v1
+
 
 def _fixed_padding(inputs, kernel_size, rate=1):
   """Pads the input along the spatial dimensions independently of input size.
@@ -78,7 +80,7 @@ def _split_divisible(num, num_ways, divisible_by=8):
 @contextlib.contextmanager
 def _v1_compatible_scope_naming(scope):
   if scope is None:  # Create uniqified separable blocks.
-    with tf.variable_scope(None, default_name='separable') as s, \
+    with tf_v1.variable_scope(None, default_name='separable') as s, \
          tf.name_scope(s.original_name_scope):
       yield ''
   else:
@@ -226,7 +228,7 @@ def expanded_conv(input_tensor,
   Raises:
     TypeError: on inval
   """
-  with tf.variable_scope(scope, default_name='expanded_conv') as s, \
+  with tf_v1.variable_scope(scope, default_name='expanded_conv') as s, \
        tf.name_scope(s.original_name_scope):
     prev_depth = input_tensor.get_shape().as_list()[3]
     if  depthwise_location not in [None, 'input', 'output', 'expansion']:

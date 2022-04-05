@@ -1,14 +1,15 @@
 import tensorflow as tf
 import tf_slim as slim
+tf_v1=tf.compat.v1
 import numpy as np
 from frontends import frontend_builder
 import os, sys
 
 def Upsampling_by_shape(inputs, feature_map_shape):
-    return tf.image.resize_bilinear(inputs, size=feature_map_shape)
+    return tf_v1.image.resize_bilinear(inputs, size=feature_map_shape)
 
 def Upsampling_by_scale(inputs, scale):
-    return tf.image.resize_bilinear(inputs, size=[tf.shape(inputs)[1]*scale,  tf.shape(inputs)[2]*scale])
+    return tf_v1.image.resize_bilinear(inputs, size=[tf.shape(inputs)[1]*scale,  tf.shape(inputs)[2]*scale])
 
 def ConvUpscaleBlock(inputs, n_filters, kernel_size=[3, 3], scale=2):
     """
@@ -89,8 +90,8 @@ def build_icnet(inputs, label_size, num_classes, preset_model='ICNet', pooling_t
       ICNet model
     """
 
-    inputs_4 = tf.image.resize_bilinear(inputs, size=[tf.shape(inputs)[1]*4,  tf.shape(inputs)[2]*4])   
-    inputs_2 = tf.image.resize_bilinear(inputs, size=[tf.shape(inputs)[1]*2,  tf.shape(inputs)[2]*2])
+    inputs_4 = tf_v1.image.resize_bilinear(inputs, size=[tf.shape(inputs)[1]*4,  tf.shape(inputs)[2]*4])   
+    inputs_2 = tf_v1.image.resize_bilinear(inputs, size=[tf.shape(inputs)[1]*2,  tf.shape(inputs)[2]*2])
     inputs_1 = inputs
 
     if frontend == 'Res50':

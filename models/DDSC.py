@@ -2,12 +2,13 @@
 
 import tensorflow as tf
 import tf_slim as slim
+tv_v1=tf.compat.v1
 from builders import frontend_builder
 import numpy as np
 import os, sys
 
 def Upsampling(inputs,scale):
-    return tf.image.resize_bilinear(inputs, size=[tf.shape(inputs)[1]*scale,  tf.shape(inputs)[2]*scale])
+    return tf_v1.image.resize_bilinear(inputs, size=[tf.shape(inputs)[1]*scale,  tf.shape(inputs)[2]*scale])
 
 def ConvUpscaleBlock(inputs, n_filters, kernel_size=[3, 3], scale=2):
     """

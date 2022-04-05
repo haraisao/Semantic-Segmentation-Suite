@@ -2,13 +2,14 @@
 
 import tensorflow as tf
 import tf_slim as slim
+tf_v1=tf.compat.v1
 import numpy as np
 from frontends import resnet_v2
 import os, sys
 
 
 def Upsampling(inputs,scale):
-    return tf.image.resize_bilinear(inputs, size=[tf.shape(inputs)[1]*scale,  tf.shape(inputs)[2]*scale])
+    return tf_v1.image.resize_bilinear(inputs, size=[tf.shape(inputs)[1]*scale,  tf.shape(inputs)[2]*scale])
 
 def ConvBlock(inputs, n_filters, kernel_size=[3, 3], stride=1):
     """
