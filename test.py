@@ -1,5 +1,6 @@
 import os,time,cv2, sys, math
 import tensorflow as tf
+tf_v1=tf.compat.v1
 import argparse
 import numpy as np
 
@@ -27,19 +28,20 @@ for class_name in class_names_list:
 num_classes = len(label_values)
 
 # Initializing network
-config = tf.ConfigProto()
+tf_v1.disable_eager_execution()
+config = tf_v1.ConfigProto()
 config.gpu_options.allow_growth = True
-sess=tf.Session(config=config)
+sess=tf_v1.Session(config=config)
 
-net_input = tf.placeholder(tf.float32,shape=[None,None,None,3])
-net_output = tf.placeholder(tf.float32,shape=[None,None,None,num_classes]) 
+net_input = tf_v1.placeholder(tf.float32,shape=[None,None,None,3])
+net_output = tf_v1.placeholder(tf.float32,shape=[None,None,None,num_classes]) 
 
 network, _ = model_builder.build_model(args.model, net_input=net_input, num_classes=num_classes, crop_width=args.crop_width, crop_height=args.crop_height, is_training=False)
 
-sess.run(tf.global_variables_initializer())
+sess.run(tf_v1.global_variables_initializer())
 
 print('Loading model checkpoint weights ...')
-saver=tf.train.Saver(max_to_keep=1000)
+saver=tf_v1.train.Saver(max_to_keep=1000)
 saver.restore(sess, args.checkpoint_path)
 
 # Load the data
@@ -66,12 +68,7 @@ for ind in range(len(test_input_names)):
     sys.stdout.flush()
 
     input_image = np.expand_dims(np.float32(utils.load_image(test_input_names[ind])[:args.crop_height, :args.crop_width]),axis=0)/255.0
-    gt = utils.load_image(test_output_names[ind])[:args.crop_height, :args.crop_width]
-    gt = helpers.reverse_one_hot(helpers.one_hot_it(gt, label_values))
-
-    st = time.time()
-    output_image = sess.run(network,feed_dict={net_input:input_image})
-
+    gt = utils.load_image(test_output_namtf_v1.disable_eager_execution()
     run_times_list.append(time.time()-st)
 
     output_image = np.array(output_image[0,:,:,:])

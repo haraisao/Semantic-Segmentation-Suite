@@ -1,5 +1,6 @@
 import os,time,cv2, sys, math
 import tensorflow as tf
+tf_v1=tf.compat.v1
 import argparse
 import numpy as np
 
@@ -28,12 +29,13 @@ print("Num Classes -->", num_classes)
 print("Image -->", args.image)
 
 # Initializing network
-config = tf.ConfigProto()
+tf_v1.disable_eager_execution()
+config = tf_v1.ConfigProto()
 config.gpu_options.allow_growth = True
-sess=tf.Session(config=config)
+sess=tf_v1.Session(config=config)
 
-net_input = tf.placeholder(tf.float32,shape=[None,None,None,3])
-net_output = tf.placeholder(tf.float32,shape=[None,None,None,num_classes]) 
+net_input = tf_v1.placeholder(tf.float32,shape=[None,None,None,3])
+net_output = tf_v1.placeholder(tf.float32,shape=[None,None,None,num_classes]) 
 
 network, _ = model_builder.build_model(args.model, net_input=net_input,
                                         num_classes=num_classes,
@@ -41,10 +43,10 @@ network, _ = model_builder.build_model(args.model, net_input=net_input,
                                         crop_height=args.crop_height,
                                         is_training=False)
 
-sess.run(tf.global_variables_initializer())
+sess.run(tf_v1.global_variables_initializer())
 
 print('Loading model checkpoint weights')
-saver=tf.train.Saver(max_to_keep=1000)
+saver=tf_v1.train.Saver(max_to_keep=1000)
 saver.restore(sess, args.checkpoint_path)
 
 
