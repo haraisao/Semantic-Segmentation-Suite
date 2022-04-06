@@ -68,7 +68,12 @@ for ind in range(len(test_input_names)):
     sys.stdout.flush()
 
     input_image = np.expand_dims(np.float32(utils.load_image(test_input_names[ind])[:args.crop_height, :args.crop_width]),axis=0)/255.0
-    gt = utils.load_image(test_output_namtf_v1.disable_eager_execution()
+    gt = utils.load_image(test_output_names[ind])[:args.crop_height, :args.crop_width]
+    gt = helpers.reverse_one_hot(helpers.one_hot_it(gt, label_values))
+
+    st = time.time()
+    output_image = sess.run(network,feed_dict={net_input:input_image})
+
     run_times_list.append(time.time()-st)
 
     output_image = np.array(output_image[0,:,:,:])
