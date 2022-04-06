@@ -2,10 +2,11 @@ from __future__ import print_function, division
 import os,time,cv2, sys, math
 import tensorflow as tf
 import tf_slim as slim
+tf_v1=tf.compat.v1
 import numpy as np
 import time, datetime
 import os, random
-from scipy.misc import imread
+from imageio import imread
 import ast
 from sklearn.metrics import precision_score, \
     recall_score, confusion_matrix, classification_report, \
@@ -63,11 +64,12 @@ def LOG(X, f=None):
 # Count total number of parameters in the model
 def count_params():
     total_parameters = 0
-    for variable in tf.trainable_variables():
+    for variable in tf_v1.trainable_variables():
         shape = variable.get_shape()
         variable_parameters = 1
         for dim in shape:
-            variable_parameters *= dim.value
+            variable_parameters *= dim
+            #variable_parameters *= dim.value
         total_parameters += variable_parameters
     print("This model has %d trainable parameters"% (total_parameters))
 

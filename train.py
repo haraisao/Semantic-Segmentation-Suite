@@ -2,6 +2,7 @@ from __future__ import print_function
 import os,time,cv2, sys, math
 import tensorflow as tf
 import tf_slim as slim
+tf_v1=tf.compat.v1
 import numpy as np
 import time, datetime
 import argparse
@@ -83,23 +84,25 @@ for class_name in class_names_list:
 
 num_classes = len(label_values)
 
-config = tf.ConfigProto()
+tf_v1.disable_eager_execution()
+
+config = tf_v1.ConfigProto()
 config.gpu_options.allow_growth = True
-sess=tf.Session(config=config)
+sess=tf_v1.Session(config=config)
 
 
 # Compute your softmax cross entropy loss
-net_input = tf.placeholder(tf.float32,shape=[None,None,None,3])
-net_output = tf.placeholder(tf.float32,shape=[None,None,None,num_classes])
+net_input = tf_v1.placeholder(tf_v1.float32,shape=[None,None,None,3])
+net_output = tf_v1.placeholder(tf_v1.float32,shape=[None,None,None,num_classes])
 
 network, init_fn = model_builder.build_model(model_name=args.model, frontend=args.frontend, net_input=net_input, num_classes=num_classes, crop_width=args.crop_width, crop_height=args.crop_height, is_training=True)
 
 loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=network, labels=net_output))
 
-opt = tf.train.RMSPropOptimizer(learning_rate=0.0001, decay=0.995).minimize(loss, var_list=[var for var in tf.trainable_variables()])
+opt = tf_v1.train.RMSPropOptimizer(learning_rate=0.0001, decay=0.995).minimize(loss, var_list=[var for var in tf_v1.trainable_variables()])
 
-saver=tf.train.Saver(max_to_keep=1000)
-sess.run(tf.global_variables_initializer())
+saver=tf_v1.train.Saver(max_to_keep=1000)
+sess.run(tf_v1.global_variables_initializer())
 
 utils.count_params()
 
