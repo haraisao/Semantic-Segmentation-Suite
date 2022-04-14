@@ -40,8 +40,12 @@ from __future__ import print_function
 import collections
 import tensorflow as tf
 
-import tf_slim as slim
-tf_v1=tf.compat.v1
+if tf.__version__[0] == '1':
+    from tensorflow.contrib import slim
+    tf_v1=tf
+else:
+    import tf_slim as slim
+    tf_v1=tf.compat.v1
 
 class Block(collections.namedtuple('Block', ['scope', 'unit_fn', 'args'])):
   """A named tuple describing a ResNet block.

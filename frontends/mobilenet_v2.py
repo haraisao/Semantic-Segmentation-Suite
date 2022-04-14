@@ -32,7 +32,13 @@ import tensorflow as tf
 from frontends import conv_blocks as ops
 from frontends import mobilenet_base as lib
 
-import tf_slim as slim
+if tf.__version__[0] == '1':
+    from tensorflow.contrib import slim
+    tf_v1=tf
+else:
+    import tf_slim as slim
+    tf_v1=tf.compat.v1
+    
 op = lib.op
 
 expand_input = ops.expand_input_by_factor

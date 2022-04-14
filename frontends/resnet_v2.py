@@ -54,8 +54,12 @@ import tensorflow as tf
 
 from frontends import resnet_utils
 
-import tf_slim as slim
-tf_v1=tf.compat.v1
+if tf.__version__[0] == '1':
+    from tensorflow.contrib import slim
+    tf_v1=tf
+else:
+    import tf_slim as slim
+    tf_v1=tf.compat.v1
 
 resnet_arg_scope = resnet_utils.resnet_arg_scope
 

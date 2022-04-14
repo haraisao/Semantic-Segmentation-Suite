@@ -1,7 +1,12 @@
 from __future__ import division
 import os,time,cv2
 import tensorflow as tf
-import tf_slim as slim
+if tf.__version__[0] == '1':
+    from tensorflow.contrib import slim
+    tf_v1=tf
+else:
+    import tf_slim as slim
+    tf_v1=tf.compat.v1
 import numpy as np
 from builders import frontend_builder
 

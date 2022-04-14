@@ -1,8 +1,13 @@
 # coding=utf-8
 
 import tensorflow as tf
-import tf_slim as slim
-tf_v1=tf.compat.v1
+
+if tf.__version__[0] == '1':
+    from tensorflow.contrib import slim
+    tf_v1=tf
+else:
+    import tf_slim as slim
+    tf_v1=tf.compat.v1
 import numpy as np
 from frontends import resnet_v2
 import os, sys

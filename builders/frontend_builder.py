@@ -1,5 +1,10 @@
 import tensorflow as tf
-import tf_slim as slim
+if tf.__version__[0] == '1':
+    from tensorflow.contrib import slim
+    tf_v1=tf
+else:
+    import tf_slim as slim
+    tf_v1=tf.compat.v1
 from frontends import resnet_v2
 from frontends import mobilenet_v2
 from frontends import inception_v4

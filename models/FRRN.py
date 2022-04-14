@@ -1,6 +1,10 @@
 import tensorflow as tf
-import tf_slim as slim
-tf_v1=tf.compat.v1
+if tf.__version__[0] == '1':
+    from tensorflow.contrib import slim
+    tf_v1=tf
+else:
+    import tf_slim as slim
+    tf_v1=tf.compat.v1
 
 def Upsampling(inputs,scale):
     return tf.image.resize_nearest_neighbor(inputs, size=[tf.shape(inputs)[1]*scale,  tf.shape(inputs)[2]*scale])
