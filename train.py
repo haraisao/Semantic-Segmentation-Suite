@@ -1,3 +1,7 @@
+#
+# -*- coding: utf-8 -*-
+#  Simple Training
+# 
 from __future__ import print_function
 import os,time,cv2, sys, math
 import tensorflow as tf
@@ -16,6 +20,7 @@ matplotlib.use('Agg')
 
 from utils import utils, helpers
 from builders import model_builder
+from utils import resize
 
 import matplotlib.pyplot as plt
 
@@ -34,16 +39,17 @@ parser.add_argument('--checkpoint_step', type=int, default=5, help='How often to
 parser.add_argument('--validation_step', type=int, default=1, help='How often to perform validation (epochs)')
 parser.add_argument('--image', type=str, default=None, help='The image you want to predict on. Only valid in "predict" mode.')
 parser.add_argument('--continue_training', type=str2bool, default=False, help='Whether to continue training from a checkpoint')
-parser.add_argument('--dataset', type=str, default="CamVid", help='Dataset you are using.')
+parser.add_argument('--dataset', type=str, default="dataset", help='Dataset you are using.')
 parser.add_argument('--crop_height', type=int, default=512, help='Height of cropped input image to network')
 parser.add_argument('--crop_width', type=int, default=512, help='Width of cropped input image to network')
 parser.add_argument('--batch_size', type=int, default=1, help='Number of images in each batch')
 parser.add_argument('--num_val_images', type=int, default=20, help='The number of images to used for validations')
-parser.add_argument('--h_flip', type=str2bool, default=False, help='Whether to randomly flip the image horizontally for data augmentation')
-parser.add_argument('--v_flip', type=str2bool, default=False, help='Whether to randomly flip the image vertically for data augmentation')
+parser.add_argument('--move_image', type=float, default=30, help='Randomly move the image') ###
+parser.add_argument('--h_flip', type=str2bool, default=True, help='Whether to randomly flip the image horizontally for data augmentation')
+parser.add_argument('--v_flip', type=str2bool, default=True, help='Whether to randomly flip the image vertically for data augmentation')
 parser.add_argument('--brightness', type=float, default=None, help='Whether to randomly change the image brightness for data augmentation. Specifies the max bightness change as a factor between 0.0 and 1.0. For example, 0.1 represents a max brightness change of 10%% (+-).')
 parser.add_argument('--rotation', type=float, default=None, help='Whether to randomly rotate the image for data augmentation. Specifies the max rotation angle in degrees.')
-parser.add_argument('--model', type=str, default="FC-DenseNet56", help='The model you are using. See model_builder.py for supported models')
+parser.add_argument('--model', type=str, default="DeepLabV3_plus", help='The model you are using. See model_builder.py for supported models')
 parser.add_argument('--frontend', type=str, default="ResNet101", help='The frontend you are using. See frontend_builder.py for supported models')
 args = parser.parse_args()
 
@@ -51,7 +57,14 @@ args = parser.parse_args()
 def data_augmentation(input_image, output_image):
     # Data augmentation
     input_image, output_image = utils.random_crop(input_image, output_image, args.crop_height, args.crop_width)
+    #input_image, output_image = resize.resize_image(input_image, output_image, args.resize_height, args.resize_width)
 
+    if args.move_image > 0:
+        h = random.uniform(-args.move_image, args.move_image)
+        v = random.uniform(-args.move_image, args.move_image)
+        m = np.float32([[1,0,h], [0,1,v]])
+        input_image = cv2.warpAffine(input_image, m, (input_image.shape[1], input_image.shape[0]), flags=cv2.INTER_NEAREST)
+        output_image = cv2.warpAffine(output_image, m, (output_image.shape[1], output_image.shape[0]), flags=cv2.INTER_NEAREST)
     if args.h_flip and random.randint(0,1):
         input_image = cv2.flip(input_image, 1)
         output_image = cv2.flip(output_image, 1)
@@ -68,7 +81,7 @@ def data_augmentation(input_image, output_image):
         M = cv2.getRotationMatrix2D((input_image.shape[1]//2, input_image.shape[0]//2), angle, 1.0)
         input_image = cv2.warpAffine(input_image, M, (input_image.shape[1], input_image.shape[0]), flags=cv2.INTER_NEAREST)
         output_image = cv2.warpAffine(output_image, M, (output_image.shape[1], output_image.shape[0]), flags=cv2.INTER_NEAREST)
-
+    
     return input_image, output_image
 
 
@@ -125,11 +138,14 @@ print("Dataset -->", args.dataset)
 print("Model -->", args.model)
 print("Crop Height -->", args.crop_height)
 print("Crop Width -->", args.crop_width)
+#print("resize Height -->", args.resize_height)
+#print("resize Width -->", args.resize_width)
 print("Num Epochs -->", args.num_epochs)
 print("Batch Size -->", args.batch_size)
 print("Num Classes -->", num_classes)
 
 print("Data Augmentation:")
+print("\tMove Image -->", args.move_image)
 print("\tVertical Flip -->", args.v_flip)
 print("\tHorizontal Flip -->", args.h_flip)
 print("\tBrightness Alteration -->", args.brightness)
@@ -172,10 +188,10 @@ for epoch in range(args.epoch_start_i, args.num_epochs):
         for j in range(args.batch_size):
             index = i*args.batch_size + j
             id = id_list[index]
-            input_image = utils.load_image(train_input_names[id])
-            output_image = utils.load_image(train_output_names[id])
-
-            with tf.device('/cpu:0'):
+            input_image = resize.load_image(train_input_names[id])
+            output_image = resize.load_image(train_output_names[id])
+            
+            with tf.device('/gpu:0'):
                 input_image, output_image = data_augmentation(input_image, output_image)
 
 
@@ -222,7 +238,7 @@ for epoch in range(args.epoch_start_i, args.num_epochs):
         print("Performing validation")
         target=open("%s/%04d/val_scores.csv"%("checkpoints",epoch),'w')
         target.write("val_name, avg_accuracy, precision, recall, f1 score, mean iou, %s\n" % (class_names_string))
-
+        
 
         scores_list = []
         class_scores_list = []
@@ -234,9 +250,14 @@ for epoch in range(args.epoch_start_i, args.num_epochs):
 
         # Do the validation on a small set of validation images
         for ind in val_indices:
+            #input_image = np.expand_dims(np.float32(util.load_image(val_input_names[ind])[:args.crop_height, :args.crop_width]),axis=0)/255.0
+            val_image = resize.load_image(val_input_names[ind])
+            #val_resize_image = cv2.resize(val_image, dsize=(args.resize_width, args.resize_height))
+            input_image = np.expand_dims(np.float32(val_image),axis=0)/255.0
 
-            input_image = np.expand_dims(np.float32(utils.load_image(val_input_names[ind])[:args.crop_height, :args.crop_width]),axis=0)/255.0
-            gt = utils.load_image(val_output_names[ind])[:args.crop_height, :args.crop_width]
+            #gt = util.load_image(val_output_names[ind])[:args.crop_height, :args.crop_width]
+            gt = resize.load_image(val_output_names[ind])
+            #gt = cv2.resize(gt, dsize=(args.resize_width, args.resize_height))
             gt = helpers.reverse_one_hot(helpers.one_hot_it(gt, label_values))
 
             # st = time.time()
@@ -270,6 +291,12 @@ for epoch in range(args.epoch_start_i, args.num_epochs):
             cv2.imwrite("%s/%04d/%s_pred.png"%("checkpoints",epoch, file_name),cv2.cvtColor(np.uint8(out_vis_image), cv2.COLOR_RGB2BGR))
             cv2.imwrite("%s/%04d/%s_gt.png"%("checkpoints",epoch, file_name),cv2.cvtColor(np.uint8(gt), cv2.COLOR_RGB2BGR))
 
+           
+            cv2.imwrite("%s/%04d/%s_ele.png"%("checkpoints",epoch, file_name),cv2.cvtColor(np.uint8(val_image), cv2.COLOR_RGB2BGR))
+            val_image = resize.reverse_color(val_image)
+            out_vis_image = resize.reverse_color(out_vis_image)
+            image_blend = cv2.addWeighted(src1=val_image, alpha=0.6, src2=out_vis_image, beta=0.4, gamma=0)
+            cv2.imwrite("%s/%04d/%s_blend.png"%("checkpoints",epoch, file_name),image_blend)
 
         target.close()
 

@@ -11,7 +11,11 @@ from sklearn.metrics import precision_score, \
     recall_score, confusion_matrix, classification_report, \
     accuracy_score, f1_score
 
-from utils import helpers
+#from utils import helpers
+
+def reverse_one_hot(image):
+    x = np.argmax(image, axis = -1)
+    return x
 
 def prepare_data(dataset_dir):
     train_input_names=[]
@@ -151,7 +155,7 @@ def lovasz_softmax(probas, labels, only_present=True, per_image=False, ignore=No
       order: use BHWC or BCHW
     """
     probas = tf.nn.softmax(probas, 3)
-    labels = helpers.reverse_one_hot(labels)
+    labels = reverse_one_hot(labels)
 
     if per_image:
         def treat_image(prob, lab):

@@ -10,8 +10,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--checkpoint_path', type=str, default=None, required=True, help='The path to the latest checkpoint weights for your model.')
 parser.add_argument('--crop_height', type=int, default=512, help='Height of cropped input image to network')
 parser.add_argument('--crop_width', type=int, default=512, help='Width of cropped input image to network')
-parser.add_argument('--model', type=str, default=None, required=True, help='The model you are using')
-parser.add_argument('--dataset', type=str, default="CamVid", required=False, help='The dataset you are using')
+parser.add_argument('--model', type=str, default="DeepLabV3_plus", required=False, help='The model you are using')
+parser.add_argument('--dataset', type=str, default="dataset", required=False, help='The dataset you are using')
 args = parser.parse_args()
 
 # Get the names of the classes so we can record the evaluation results
