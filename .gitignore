@@ -16,3 +16,6 @@ CamVid_train.tfrecords
 tfrecords.py
 *.old/
 junk/
+dataset/
+*.org
+
